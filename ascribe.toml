@@ -1,0 +1,76 @@
+# The content model for examples/quill: the model SPEC Appendix B assumes (see
+# examples/content-models/quill.toml), plus image attributes.
+spec = "0.1"
+
+[project]
+content-root = "docs"
+output-dir = ".ascribe/build"
+
+# Every page is a `page`, and says so with `type: page`. Appendix B's
+# frontmatter has `title` and `description`; `available` is reserved and
+# always accepted.
+[types.page.frontmatter]
+title = "string"
+description = { type = "string?", role = "description" }
+
+# `@variant {pm=npm}:` and friends.
+[dimensions.pm]
+label = "Package manager"
+values = ["npm", "pnpm", "yarn"]
+labels = { yarn = "Yarn" }
+
+# `@variant {deployment=cloud}:` and `@available: cloud, self-managed preview 3.3`.
+# `cloud` has no versions. `self-managed` keeps its own name as its label, which
+# gives SPEC §9.4's example line: "Available: Quill Cloud (GA); self-managed
+# (preview, 3.4+)".
+[dimensions.deployment]
+label = "Deployment"
+values = ["cloud", "self-managed"]
+versionless = ["cloud"]
+labels = { cloud = "Quill Cloud" }
+
+[phrases]
+product = "Quill"
+cloud = "Quill Cloud"
+version = "3.4.1"
+api = "https://api.quill.dev/v3/"
+
+# Image attributes: `![alt](src){width=600}`.
+[images.attributes]
+width = "number?"
+height = "number?"
+
+[consumer]
+profile = "astro"
+site = "https://docs.quill.dev"
+# Nothing for agents: Quill's outputs are the fixtures both renderers are
+# held to (tests/render/corpus/quill/), so they stay the site's alone.
+agents = false
+
+# Self-managed Quill's live lines, oldest first: 3.5 is the current line.
+# The site build publishes each, so there's no build for an older line.
+[releases.self-managed]
+live = ["3.4", "3.5"]
+
+# The published site: every arm as a switcher, availability as badges, and
+# an output for each live line of self-managed: 3.5's at the root, and
+# 3.4's as `site@3.4`, under `/3.4/`.
+[builds.site]
+variants = "switch"
+availability = "badge"
+versions = "self-managed"
+
+# Quill Cloud only: deployment groups reduce to their cloud arm, and content
+# not available on cloud is removed. The `pm` group stays a full switcher.
+[builds.cloud]
+variants = { deployment = "cloud" }
+availability = { filter = "cloud" }
+
+[editor]
+build = "site"
+
+# The pages keep the versions their marks name, as the site's badges show
+# them: Appendix B's page is `cloud, self-managed preview 3.3`, though 3.3 is
+# older than every live line.
+[checks]
+available-same-in-every-line = "off"

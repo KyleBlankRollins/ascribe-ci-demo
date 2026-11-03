@@ -1,0 +1,7 @@
+{
+  "name": "ascribe-ci-demo",
+  "private": true,
+  "devDependencies": {
+    "@ascribed/cli": "0.4.5"
+  }
+}
